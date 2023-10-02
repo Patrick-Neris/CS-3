@@ -1,7 +1,8 @@
 import NavBar from "@/components/NavBar";
 import CardConta from "@/components/CardConta";
+import { cookies } from "next/headers";
 
-async function enviarCpf(cpf) {
+async function pesquisarContas(cpf) {
   const url = "https://sprint-api.vercel.app/api/sprint";
   const parametros = {
     cpf: cpf,
@@ -16,27 +17,30 @@ async function enviarCpf(cpf) {
 
   const response = await fetch(url, options);
   const json = await response.json();
-  return json.results
-}
-
-const contaTeste = {
-  valor: 23.19,
-  data: "23-09-2022",
-  horario: "10:56",
-  pagamento: "pix"
+  return json
 }
 
 export default async function Home() {
 
-  const contas = await enviarCpf("12345678910")
+  const contas = await pesquisarContas(cookies().get("cpf").value)
+
+  if(!contas.message) {
+    return (
+      <>
+        <NavBar />
+  
+        <section className="flex flex-wrap">
+          {contas.map(conta => <CardConta conta={conta}/>)}
+        </section>
+      </>
+    );
+  }
+  
   return (
     <>
       <NavBar />
 
-      <section className="flex flex-wrap">
-        {/* {contas.map(conta => <CardConta conta={conta}/>)} */}
-        {<CardConta conta={contaTeste}/>}
-      </section>
+      <h1 className="p-2 text-2xl font-bold">Não há contas cadastradas para seu usuário.</h1>
     </>
   );
 }
